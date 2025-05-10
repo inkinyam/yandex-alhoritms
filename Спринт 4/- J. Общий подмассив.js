@@ -43,23 +43,29 @@ process.stdin.on("end", solve);
 function compareLines(first, second) {
   const n = first.length;
   const m = second.length;
-
   let maxLength = 0;
-  let currentLength = 0;
 
-  // Проходим по всем возможным сдвигам
-  for (let shift = -m + 1; shift < n; shift++) {
-    currentLength = 0;
-    for (
-      let i = Math.max(0, shift), j = Math.max(0, -shift);
-      i < n && j < m;
-      i++, j++
-    ) {
-      if (first[i] === second[j]) {
-        currentLength++;
-        maxLength = Math.max(maxLength, currentLength);
-      } else {
-        currentLength = 0;
+  const indices = new Map();
+  for (let i = 0; i < n; i++) {
+    if (!indices.has(first[i])) {
+      indices.set(first[i], []);
+    }
+    indices.get(first[i]).push(i);
+  }
+
+  for (let j = 0; j < m; j++) {
+    const matches = indices.get(second[j]);
+    if (matches) {
+      for (const i of matches) {
+        let length = 0;
+        while (
+          i + length < n &&
+          j + length < m &&
+          first[i + length] === second[j + length]
+        ) {
+          length++;
+        }
+        maxLength = Math.max(maxLength, length);
       }
     }
   }
