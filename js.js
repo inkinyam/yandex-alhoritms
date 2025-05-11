@@ -1,65 +1,114 @@
-/* const documents = [
-  "i love coffee free free",
-  "coffee with milk and sugar i i",
-  "free tea for everyone i",
+const commands = [
+  "get 1",
+  "put 1 10",
+  "put 2 4",
+  "get 1",
+  "get 2",
+  "delete 2",
+  "get 2",
+  "put 1 5",
+  "get -1",
+  "delete 2",
 ];
-const queries = [
-  "i like black coffee without milk",
-  "everyone loves new year",
-  "mary likes black coffee without milk",
-]; */
 
-const documents = [
-  "i like dfs and bfs",
-  "i like dfs dfs",
-  "i like bfs with bfs and bfs",
-];
-const queries = ["dfs dfs dfs dfs bfs"];
+class ElementAbsentError extends Error {
+  constructor() {
+    super("Ошибка: Элемент отсутствует");
+    this.name = "ElementAbsentError";
+  }
+}
 
-const generateIndex = (documents) => {
-  const wordsIndex = new Map();
-  for (let d = 0; d < documents.length; d++) {
-    const words = documents[d].split(" ");
-    for (const word of words) {
-      if (!wordsIndex.has(word)) {
-        wordsIndex.set(word, new Map([[d, 1]]));
-      } else {
-        const docMap = wordsIndex.get(word);
-        docMap.set(d, (docMap.get(d) || 0) + 1);
+class HashTable {
+  constructor(size = 100007) {
+    this.table = new Array(size);
+    this.size = size;
+    this.base = 0.6180339887;
+  }
+
+  getHash(key) {
+    return Math.floor(
+      Math.abs(Number(key) * this.base + this.size) % this.size
+    );
+  }
+
+  put(key, value) {
+    const index = this.getHash(key);
+    if (!this.table[index]) {
+      this.table[index] = [];
+    }
+    const bucket = this.table[index];
+
+    for (let b = 0; b < bucket.length; b++) {
+      if (bucket[b][0] === key) {
+        bucket[b][1] = value;
+        return;
       }
     }
+
+    bucket.push([key, value]);
   }
-  return wordsIndex;
-};
 
-const searchSystem = (documents, queries) => {
-  const index = generateIndex(documents);
-  const results = [];
+  get(key) {
+    const index = this.getHash(key);
+    const bucket = this.table[index];
 
-  for (const query of queries) {
-    const relevance = new Map();
-    const uniqueQueryWords = Array.from(new Set(query.split(" "))); // Только уникальные слова
+    if (!bucket) throw new ElementAbsentError();
 
-    for (const word of uniqueQueryWords) {
-      if (index.has(word)) {
-        for (const [docId, count] of index.get(word)) {
-          relevance.set(docId, (relevance.get(docId) || 0) + count);
+    for (const [k, v] of bucket) {
+      if (k === key) {
+        return v;
+      }
+    }
+
+    throw new ElementAbsentError();
+  }
+
+  delete(key) {
+    const index = this.getHash(key);
+    const bucket = this.table[index];
+
+    if (!bucket) throw new ElementAbsentError();
+    for (let i = 0; i < bucket.length; i++) {
+      if (bucket[i][0] === key) {
+        const deletedValue = bucket[i][1];
+        bucket.splice(i, 1);
+        return deletedValue;
+      }
+    }
+    throw new ElementAbsentError();
+  }
+}
+
+const handleHashOperations = (commands) => {
+  let hashTable = new HashTable();
+  const res = [];
+
+  for (const commandStr of commands) {
+    const [command, key, value] = commandStr.split(" ");
+    switch (command) {
+      case "get":
+        try {
+          res.push(hashTable.get(key));
+        } catch (error) {
+          res.push("None");
         }
-      }
+        break;
+
+      case "put":
+        hashTable.put(key, value);
+        break;
+
+      case "delete":
+        try {
+          res.push(hashTable.delete(key));
+        } catch (error) {
+          res.push("None");
+        }
+        break;
     }
-
-    const sorted = Array.from(relevance.entries())
-      .sort((a, b) => {
-        if (b[1] !== a[1]) return b[1] - a[1]; // Сначала по релевантности
-        return a[0] - b[0]; // При равенстве - по номеру документа
-      })
-      .slice(0, 5)
-      .map(([docId]) => docId + 1); // Нумерация с 1
-
-    results.push(sorted);
   }
 
-  return results;
+  return res;
 };
 
-console.log(searchSystem(documents, queries));
+console.log(handleHashOperations(commands));
