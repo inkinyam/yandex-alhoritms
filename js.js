@@ -136,6 +136,7 @@ const queries = [
 ];
 
 const RESULT_COUNTS = 5;
+
 const buildSearchIndex = (documents) => {
   const searchIndex = new Map();
   for (let d = 0; d < documents.length; d++) {
@@ -164,37 +165,56 @@ const findRelevantDocuments = (documents, queries) => {
         }
       }
     }
+
     const entries = Array.from(relevance.entries());
-    let top5 = [];
 
     if (entries.length <= RESULT_COUNTS) {
-      // Сортируем только если элементов <= 5
-      entries.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-      top5 = entries.slice(0, RESULT_COUNTS);
+      entries.sort((a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0] - b[0];
+      });
     } else {
-      // Быстрый отбор топ-5 без полной сортировки
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        if (top5.length < RESULT_COUNTS) {
-          top5.push(entry);
-          if (top5.length === RESULT_COUNTS) {
-            top5.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-          }
-        } else if (
-          entry[1] > top5[RESULT_COUNTS - 1][1] ||
-          (entry[1] === top5[RESULT_COUNTS - 1][1] &&
-            entry[0] < top5[RESULT_COUNTS - 1][0])
-        ) {
-          top5[RESULT_COUNTS - 1] = entry;
-          top5.sort((a, b) => b[1] - a[1] || a[0] - b[0]);
-        }
-      }
+      partialQuickSort(entries, RESULT_COUNTS, (a, b) => {
+        if (b[1] !== a[1]) return b[1] - a[1];
+        return a[0] - b[0];
+      });
+      entries.length = RESULT_COUNTS;
     }
 
-    results.push(top5.map(([d]) => d + 1));
+    const top5 = entries.slice(0, RESULT_COUNTS).map(([d]) => d + 1);
+    results.push(top5);
   }
 
   return results;
 };
 
+function partialQuickSort(arr, k, compare, left = 0, right = arr.length - 1) {
+  if (left >= right) return;
+
+  const pivotIndex = randomPartition(arr, left, right, compare);
+
+  partialQuickSort(arr, k, compare, left, pivotIndex - 1);
+
+  if (pivotIndex < k - 1) {
+    partialQuickSort(arr, k, compare, pivotIndex + 1, right);
+  }
+}
+
+function randomPartition(arr, left, right, compare) {
+  const pivotIndex = left + Math.floor(Math.random() * (right - left + 1));
+  [arr[pivotIndex], arr[right]] = [arr[right], arr[pivotIndex]];
+
+  const pivot = arr[right];
+  let i = left;
+
+  for (let j = left; j < right; j++) {
+    if (compare(arr[j], pivot) <= 0) {
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      i++;
+    }
+  }
+
+  [arr[i], arr[right]] = [arr[right], arr[i]];
+  return i;
+}
 console.log(findRelevantDocuments(documents, queries));
