@@ -15,18 +15,19 @@
 Формат вывода
 Функция должна напечатать по неубыванию все ключи от L до R по одному в строке.
 */
-
-class Node {
-  constructor(value, left = null, right = null) {
-    this.value = value;
-    this.left = left;
-    this.right = right;
+if (process.env.REMOTE_JUDGE !== "true") {
+  class Node {
+    constructor(value, left = null, right = null) {
+      this.value = value;
+      this.left = left;
+      this.right = right;
+    }
   }
 }
 
 function printRange(root, left, right, result = []) {
   if (root === null) {
-    return result;
+    return;
   }
   if (root.left !== null) {
     printRange(root.left, left, right, result);
@@ -48,7 +49,6 @@ function test() {
   var node5 = new Node(9, node4, null);
   var node6 = new Node(10, node5, null);
   var node7 = new Node(5, node2, node6);
-  console.log(printRange(node7, 2, 8));
+  printRange(node7, 2, 8);
   // expected output: 2 5 8 8
 }
-test();
