@@ -1,18 +1,35 @@
-const n = 4;
-const m = 4;
-const firstVertex = 3;
-const arr = ["3 2", "4 3", "1 4", "1 2"];
+/*
+функция DFS(start_vertex):
+    stack = Stack()
+    stack.push(start_vertex)
+    пока stack не пуст:
+        # Получаем из стека очередную вершину.
+        # Это может быть как новая вершина, так и уже посещённая однажды.
+        v = stack.pop()
+        если color[v] == white:
+            # Красим вершину в серый. И сразу кладём её обратно в стек:
+            # это позволит алгоритму позднее вспомнить обратный путь по графу.
+            color[v] = gray
+            stack.push(v)
+            # Теперь добавляем в стек все непосещённые соседние вершины,
+            # вместо вызова рекурсии
+            для каждого исходящего ребра (v,w):
+                возьмём вершину w
+                если color[w] == white:
+                    stack.push(w)
+        иначе, если color[v] == gray:
+            # Серую вершину мы могли получить из стека только на обратном пути.
+            # Следовательно, её следует перекрасить в чёрный.
+            color[v] = black  
 
-const getLine = (arr, vertexCount, firstVertex) => {};
-
-console.log(getLine(arr, 5));
+*/
+let color = ["white", "white"]; // Длина массива равна числу вершин |V|.
 
 const getOutgoingEdges = () => {
   // Получите список исходящих ребер в зависимости от способа хранения графа
 };
 
 function DFS(startVertex) {
-  let color = new Array(n).fill("white");
   let stack = [];
   stack.push(startVertex); // Добавляем стартовую вершину в стек.
 

@@ -1,5 +1,5 @@
 /*
-1. ОТЧЕТ  https://admin.contest.yandex.ru/submissions/138881765
+1. ОТЧЕТ  https://admin.contest.yandex.ru/submissions/138882835
 
 2. ПРИНЦИП РАБОТЫ
 На вход подается корень бинарного дерева и индекс элемента, который нужно удалить.
@@ -48,7 +48,7 @@ if (process.env.REMOTE_JUDGE !== "true") {
 }
 
 function remove(node, key) {
-  if (!node) {
+  if (node === null) {
     return null;
   }
 
@@ -62,23 +62,23 @@ function remove(node, key) {
     return node;
   }
 
-  if (!node.left && !node.right) {
+  if (node.left === null && node.right === null) {
     return null;
   }
-  if (!node.left) {
+  if (node.left === null) {
     return node.right;
   }
-  if (!node.right) {
+  if (node.right === null) {
     return node.left;
   }
 
-  let minNode = node.right;
-  while (minNode.left) {
-    minNode = minNode.left;
+  let minElement = node.right;
+  while (minElement.left) {
+    minElement = minElement.left;
   }
 
-  node.value = minNode.value;
-  node.right = remove(node.right, minNode.value);
+  node.value = minElement.value;
+  node.right = remove(node.right, minElement.value);
 
   return node;
 }

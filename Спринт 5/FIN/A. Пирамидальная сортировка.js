@@ -1,6 +1,7 @@
 /*
 1. ОТЧЕТ
  https://admin.contest.yandex.ru/submissions/138866563
+м2 https://admin.contest.yandex.ru/submissions/138900773
 
 2. ПРИНЦИП РАБОТЫ
 Создаем класс Heap, у которого есть несколько методов:
@@ -61,11 +62,19 @@
 
 Дополнительная память:
 - переменные для метода siftDown - 3*O(1) 
-- рекурсивные вызовы O(logN) для стека вызовов
 - переменные для метода siftUp - O(1)
-- рекурсивные вызовы O(logN) для стека вызовов
+- итеративные просеивания вниз и вверх занимают теперь O(1) памяти
 - переменные для разбиения строк для сравнения 2*O(1)
 
+6.ИЗМЕНЕНИЯ С ПЕРВОЙ ВЕРСИИ
+
+1. Функцию сравнения вынесла из класса, теперь она передается в конструктор для возможности использовать разные методы сравнения в разных экземплярах класса Heap
+2. Функция сравнения стала более оптимальной, она теперь не разбивает сравниваемые элементы на куски для сравнения, а просто их сравнивает.
+3. Методы siftUp, siftDown теперь работают итеративно, чтобы не занимать память на рекурсивные вызовы.
+
+Доказательство корректности итеративных методов:
+- есть условия выхода из цикла, если элемент находится на правильном месте
+- есть условия выхода в siftDown, если цикл дошел до конца кучи
 */
 const _readline = require("readline");
 
@@ -83,45 +92,49 @@ _reader.on("line", (line) => {
 process.stdin.on("end", solve);
 
 class Heap {
-  constructor() {
+  constructor(comparator) {
     this.items = [null];
+    this.comparator = comparator;
   }
   siftDown(index) {
-    const left = 2 * index;
-    const right = 2 * index + 1;
+    while (true) {
+      const left = 2 * index;
+      const right = 2 * index + 1;
 
-    if (left >= this.items.length) {
-      return;
-    }
-    const indexLargest =
-      right < this.items.length &&
-      this._compareElements(this.items[right], this.items[left]) > 0
-        ? right
-        : left;
+      if (left >= this.items.length) {
+        break;
+      }
 
-    if (
-      this._compareElements(this.items[indexLargest], this.items[index]) > 0
-    ) {
-      [this.items[index], this.items[indexLargest]] = [
-        this.items[indexLargest],
-        this.items[index],
-      ];
-      this.siftDown(indexLargest);
+      const indexLargest =
+        right < this.items.length &&
+        this.comparator(this.items[right], this.items[left]) > 0
+          ? right
+          : left;
+
+      if (this.comparator(this.items[indexLargest], this.items[index]) > 0) {
+        [this.items[index], this.items[indexLargest]] = [
+          this.items[indexLargest],
+          this.items[index],
+        ];
+        index = indexLargest;
+      } else {
+        break;
+      }
     }
   }
 
   siftUp(index) {
-    if (index === 1) {
-      return;
-    }
-
-    const parentIndex = Math.floor(index / 2);
-    if (this._compareElements(this.items[parentIndex], this.items[index]) < 0) {
-      [this.items[parentIndex], this.items[index]] = [
-        this.items[index],
-        this.items[parentIndex],
-      ];
-      this.siftUp(parentIndex);
+    while (index > 1) {
+      const parentIndex = Math.floor(index / 2);
+      if (this.comparator(this.items[parentIndex], this.items[index]) < 0) {
+        [this.items[parentIndex], this.items[index]] = [
+          this.items[index],
+          this.items[parentIndex],
+        ];
+        index = parentIndex;
+      } else {
+        break;
+      }
     }
   }
 
@@ -138,28 +151,28 @@ class Heap {
     this.siftDown(1);
     return result;
   }
-
-  _compareElements(a, b) {
-    const [low_a, hight_a, medium_a] = a.split(" ");
-    const [low_b, hight_b, medium_b] = b.split(" ");
-
-    // Сравниваем количество задач (больше - выше)
-    if (Number(hight_a) !== Number(hight_b)) {
-      return Number(hight_a) > Number(hight_b) ? 1 : -1;
-    }
-
-    // При равном количестве задач сравниваем штрафы (меньше - выше)
-    if (Number(medium_a) !== Number(medium_b)) {
-      return Number(medium_a) < Number(medium_b) ? 1 : -1;
-    }
-
-    // При равных штрафах сравниваем имена по алфавиту
-    return low_a < low_b ? 1 : -1;
-  }
 }
 
+const compareElements = (a, b) => {
+  const [low_a, hight_a, medium_a] = a;
+  const [low_b, hight_b, medium_b] = b;
+
+  // Сравниваем количество задач (больше - выше)
+  if (Number(hight_a) !== Number(hight_b)) {
+    return Number(hight_a) > Number(hight_b) ? 1 : -1;
+  }
+
+  // При равном количестве задач сравниваем штрафы (меньше - выше)
+  if (Number(medium_a) !== Number(medium_b)) {
+    return Number(medium_a) < Number(medium_b) ? 1 : -1;
+  }
+
+  // При равных штрафах сравниваем имена по алфавиту
+  return low_a < low_b ? 1 : -1;
+};
+
 const pyramidSort = (array) => {
-  const heap = new Heap();
+  const heap = new Heap(compareElements);
 
   for (let item of array) {
     heap.addElement(item);
@@ -167,7 +180,7 @@ const pyramidSort = (array) => {
 
   let sortedArr = [];
   while (heap.items.length > 1) {
-    let maxEl = heap.popMax().split(" ")[0];
+    let maxEl = heap.popMax()[0];
     sortedArr.push(maxEl);
   }
 
@@ -177,7 +190,8 @@ const pyramidSort = (array) => {
 function solve() {
   const count = readInt();
   const list = readArray(count);
-  const result = pyramidSort(list);
+  const list2 = list.map((item) => item.split(" "));
+  const result = pyramidSort(list2);
   result.forEach((student) => {
     process.stdout.write(student);
     process.stdout.write("\n");
