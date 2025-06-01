@@ -47,7 +47,7 @@ function DFS(startVertex) {
 
       // Теперь добавляем в стек все непосещённые соседние вершины,
       // вместо вызова рекурсии
-      for (let w of outgoingEdges) {
+      for (let w of getOutgoingEdges(v)) {
         // Для каждого исходящего ребра (v, w):
         if (color[w] === "white") {
           stack.push(w);

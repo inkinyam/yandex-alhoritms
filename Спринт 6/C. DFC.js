@@ -24,18 +24,56 @@ _reader.on("line", (line) => {
 
 process.stdin.on("end", solve);
 
-const getLine = (arr, vertexCount, firstVertex) => {};
+function mainDFS(arr, n, start) {
+  // Создаем список смежности
+  const adjacencyList = Array(n + 1)
+    .fill()
+    .map(() => []);
+
+  // Заполняем список смежности
+  for (const edge of arr) {
+    const [u, v] = edge.split(" ").map(Number);
+    adjacencyList[u].push(v);
+    adjacencyList[v].push(u);
+  }
+
+  // Сортируем соседей для каждой вершины
+  for (let i = 1; i <= n; i++) {
+    adjacencyList[i].sort((a, b) => a - b);
+  }
+
+  const visited = new Set();
+  const result = [];
+  const stack = [start];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+
+    if (!visited.has(current)) {
+      visited.add(current);
+      result.push(current);
+
+      // Добавляем соседей в стек в обратном порядке
+      // чтобы они обрабатывались в правильном порядке
+      for (let i = adjacencyList[current].length - 1; i >= 0; i--) {
+        const neighbor = adjacencyList[current][i];
+        if (!visited.has(neighbor)) {
+          stack.push(neighbor);
+        }
+      }
+    }
+  }
+
+  return result;
+}
 
 function solve() {
   const counters = readLine();
   const [n, m] = counters.split(" ").map(Number);
   const list = readArray(m);
   const firstVertex = readInt();
-  const result = getLine(list, n, firstVertex);
-  result.forEach((i) => {
-    process.stdout.write(i);
-    process.stdout.write("\n");
-  });
+  const result = mainDFS(list, n, firstVertex).map(String).join(" ");
+  process.stdout.write(result);
 }
 
 function readInt() {
@@ -43,6 +81,7 @@ function readInt() {
   curLine++;
   return n;
 }
+
 function readLine() {
   const line = inputLines[curLine];
   curLine++;
@@ -56,3 +95,10 @@ function readArray(counter) {
   }
   return arr;
 }
+
+// Тестовый вызов
+const testN = 4;
+const testStart = 3;
+const testArr = ["4 4", "4 3", "1 4", "1 2"];
+const testResult = mainDFS(testArr, testN, testStart);
+console.log("Результат:", testResult.join(" "));

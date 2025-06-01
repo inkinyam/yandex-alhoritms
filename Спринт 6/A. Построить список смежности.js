@@ -30,16 +30,20 @@ _reader.on("line", (line) => {
 process.stdin.on("end", solve);
 
 const getMatrix = (arr, vertexCount) => {
-  const matrix = new Array(vertexCount)
-    .fill(0)
-    .map(() => new Array(vertexCount).fill(0));
+  const res = Array(vertexCount + 1)
+    .fill()
+    .map(() => [0, []]);
 
-  for (let i = 0; i < arr.length; i++) {
-    let [n, m] = arr[i].split(" ");
-    matrix[n - 1][m - 1] = matrix[n - 1][m - 1] + 1;
+  const beams = arr.map((item) => item.split(" ").map(Number));
+  for (let b = 0; b < beams.length; b++) {
+    let [vertex, beam] = beams[b];
+    res[vertex][0] = res[vertex][0] + 1;
+    res[vertex][1].push(beam);
   }
 
-  return matrix.map((item) => item.join(" "));
+  return res.slice(1).map((item) => {
+    return `${item[0]} ${item[1].sort((a, b) => a - b).join(" ")}`;
+  });
 };
 
 function solve() {

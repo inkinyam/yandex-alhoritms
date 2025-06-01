@@ -25,7 +25,18 @@ _reader.on("line", (line) => {
 
 process.stdin.on("end", solve);
 
-const getMatrix = (arr, vertexCount) => {};
+const getMatrix = (arr, vertexCount) => {
+  const matrix = new Array(vertexCount)
+    .fill(0)
+    .map(() => new Array(vertexCount).fill(0));
+
+  for (let i = 0; i < arr.length; i++) {
+    let [n, m] = arr[i].split(" ");
+    matrix[n - 1][m - 1] = matrix[n - 1][m - 1] + 1;
+  }
+
+  return matrix.map((item) => item.join(" "));
+};
 
 function solve() {
   const counters = readLine();

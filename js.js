@@ -1,54 +1,44 @@
-const n = 4;
-const m = 4;
-const firstVertex = 3;
-const arr = ["3 2", "4 3", "1 4", "1 2"];
+const n = 5;
+const m = 3;
+const arr = [
+  [3, 2],
+  [3, 4],
+  [2, 5],
+];
 
-const getLine = (arr, vertexCount, firstVertex) => {};
+function topSort(n, arr) {
+  let color = new Array(n + 1).fill("white");
+  let order = [];
 
-console.log(getLine(arr, 5));
-
-const getOutgoingEdges = () => {
-  // Получите список исходящих ребер в зависимости от способа хранения графа
-};
-
-function DFS(startVertex) {
-  let color = new Array(n).fill("white");
-  let stack = [];
-  stack.push(startVertex); // Добавляем стартовую вершину в стек.
-
-  while (stack.length > 0) {
-    // Пока стек не пуст:
-    // Получаем из стека очередную вершину.
-    // Это может быть как новая вершина, так и уже посещённая однажды.
-    const v = stack.pop();
-
-    if (color[v] === "white") {
-      // Красим вершину в серый. И сразу кладём её обратно в стек:
-      // это позволит алгоритму позднее вспомнить обратный путь по графу.
-      color[v] = "gray";
-      stack.push(v);
-
-      // Теперь добавляем в стек все непосещённые соседние вершины,
-      // вместо вызова рекурсии
-      for (let w of outgoingEdges) {
-        // Для каждого исходящего ребра (v, w):
-        if (color[w] === "white") {
-          stack.push(w);
-        }
+  const getOutgoingEdges = (vertex) => {
+    let vertexes = [];
+    for (let i = 0; i < arr.length; i++) {
+      let [from, to] = arr[i];
+      if (from === vertex) {
+        vertexes.push(to);
       }
-    } else if (color[v] === "gray") {
-      // Серую вершину мы могли получить из стека только на обратном пути.
-      // Следовательно, её следует перекрасить в чёрный.
-      color[v] = "black";
     }
-  }
-}
+    return vertexes;
+  };
 
-function mainDFS() {
-  for (let i = 0; i < color.length; i++) {
-    // Перебираем варианты стартовых вершин, пока они существуют.
+  function DFS(v) {
+    color[v] = "gray";
+
+    for (let w of getOutgoingEdges(v)) {
+      if (color[w] === "white") {
+        DFS(w);
+      }
+    }
+    color[v] = "black";
+    order.push(v);
+  }
+
+  for (let i = n + 1; i >= 1; i--) {
     if (color[i] === "white") {
-      DFS(i); // Запускаем обход, стартуя с i-й вершины.
+      DFS(i);
     }
   }
+
+  return order.reverse();
 }
+console.log(topSort(n, arr));

@@ -1,7 +1,7 @@
 /*
 1. ОТЧЕТ
  https://admin.contest.yandex.ru/submissions/138866563
-м2 https://admin.contest.yandex.ru/submissions/138900773
+м2 https://admin.contest.yandex.ru/submissions/138905123
 
 2. ПРИНЦИП РАБОТЫ
 Создаем класс Heap, у которого есть несколько методов:
@@ -190,8 +190,8 @@ const pyramidSort = (array) => {
 function solve() {
   const count = readInt();
   const list = readArray(count);
-  const list2 = list.map((item) => item.split(" "));
-  const result = pyramidSort(list2);
+  const splittedList = list.map((item) => item.split(" "));
+  const result = pyramidSort(splittedList);
   result.forEach((student) => {
     process.stdout.write(student);
     process.stdout.write("\n");
