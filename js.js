@@ -1,44 +1,75 @@
-const n = 5;
-const m = 3;
+/* ### B. Водный Мир [original]
+
+Ивану приснился сон про мрачное будущее планеты: все льды растаяли, уровень океана повысился, оставив лишь небольшие островки на месте гор. Иван проснулся в холодном поту и больше не смог уснуть: он запомнил карту, и теперь ему очень хочется посчитать, сколько же было островов в его сне и какой из них самый большой. Подсчёт островов (как и овец) не помогает Ивану провалиться в сон, а наоборот, мешает. Помогите Ивану найти ответ к задаче как можно скорее, иначе он проспит и опоздает на работу!
+
+Карта представляет собой непустое поле n на m, где присутствует только два вида символов: земля "#" и вода ".". Острова соединяются только по горизонтали и вертикали, то есть если две решётки расположены по диагонали, они будут считаться различными островами.
+
+Формат ввода
+В первой строке записаны два положительных числа — размеры земли, оба не превосходят 1000. Далее — карта, где земля обозначается "#", а вода — "."
+
+Формат вывода
+Помогите Ивану — выведите два числа: количество островов и размер самого большого.
+ */
+
+const n = 4; //кол-во вершин
+const m = 5; //кол-во ребер
 const arr = [
-  [3, 2],
-  [3, 4],
-  [2, 5],
+  //ребра с весами
+  ["#", "#", "#", "#", "#"],
+  [".", "#", ".", ".", "."],
+  [".", ".", "#", ".", "."],
+  ["#", "#", "#", "#", "#"],
 ];
 
-function topSort(n, arr) {
-  let color = new Array(n + 1).fill("white");
-  let order = [];
+const correctRes = [2, 6];
 
-  const getOutgoingEdges = (vertex) => {
-    let vertexes = [];
-    for (let i = 0; i < arr.length; i++) {
-      let [from, to] = arr[i];
-      if (from === vertex) {
-        vertexes.push(to);
+const getMaxSize = (arr, n) => {
+  const m = arr[0].length;
+  const visited = Array.from({ length: n }, () => Array(m).fill(false));
+  let islands = 0;
+  let maxSize = 0;
+
+  const directions = [
+    [0, 1], // вправо
+    [1, 0], // вниз
+    [0, -1], // влево
+    [-1, 0], // вверх
+  ];
+
+  const bfs = (startI, startJ) => {
+    let queue = [[startI, startJ]];
+    visited[startI][startJ] = true;
+    let size = 1;
+    while (queue.length > 0) {
+      const [i, j] = queue.shift();
+      for (const [di, dj] of directions) {
+        const ni = i + di;
+        const nj = j + dj;
+        if (
+          ni >= 0 &&
+          ni < n &&
+          nj >= 0 &&
+          nj < m &&
+          !visited[ni][nj] &&
+          arr[ni][nj] === "#"
+        ) {
+          visited[ni][nj] = true;
+          queue.push([ni, nj]);
+          size++;
+        }
       }
     }
-    return vertexes;
+    return size;
   };
 
-  function DFS(v) {
-    color[v] = "gray";
-
-    for (let w of getOutgoingEdges(v)) {
-      if (color[w] === "white") {
-        DFS(w);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < m; j++) {
+      if (arr[i][j] === "#" && !visited[i][j]) {
+        islands++;
+        const size = bfs(i, j);
+        if (size > maxSize) maxSize = size;
       }
     }
-    color[v] = "black";
-    order.push(v);
   }
-
-  for (let i = n + 1; i >= 1; i--) {
-    if (color[i] === "white") {
-      DFS(i);
-    }
-  }
-
-  return order.reverse();
-}
-console.log(topSort(n, arr));
+  return [islands, maxSize];
+};
