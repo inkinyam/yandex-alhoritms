@@ -9,6 +9,20 @@
 Формат вывода
 Выведите полученный палиндром. Заметьте, что ответ определяется однозначно.
 */
+const _readline = require("readline");
+
+const _reader = _readline.createInterface({
+  input: process.stdin,
+});
+
+const inputLines = [];
+let curLine = 0;
+
+_reader.on("line", (line) => {
+  inputLines.push(line);
+});
+
+process.stdin.on("end", solve);
 
 function getPalindrome(str) {
   // Подсчитываем частоту каждого символа
@@ -48,9 +62,29 @@ function getPalindrome(str) {
   return palindrome;
 }
 
-// Тестовые примеры
-console.log("Тест 1:", getPalindrome("aaaabb")); // Ожидаем: aabbaa
-console.log("Тест 2:", getPalindrome("abc")); // Ожидаем: a
-console.log("Тест 3:", getPalindrome("aabb")); // Ожидаем: abba
-console.log("Тест 4:", getPalindrome("xyz")); // Ожидаем: x
-console.log("Тест 5:", getPalindrome("hello")); // Ожидаем: lhl
+function solve() {
+  const string = readLine();
+
+  const result = getPalindrome(string);
+  process.stdout.write(result);
+}
+
+function readLine() {
+  const line = inputLines[curLine];
+  curLine++;
+  return line;
+}
+
+function readInt() {
+  const n = Number(inputLines[curLine]);
+  curLine++;
+  return n;
+}
+
+function readArray(counter) {
+  const arr = [];
+  for (let i = 0; i < counter; i++) {
+    arr.push(inputLines[curLine++]);
+  }
+  return arr;
+}
